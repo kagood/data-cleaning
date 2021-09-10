@@ -1,0 +1,35 @@
+---
+title: "Cleaning Qualtrics Data"
+author: "Kayla Good"
+date: ""
+output:
+  pdf_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: '2'
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
+---
+
+
+```{r read in data, message=F, echo=F}
+# read in data
+data = read_csv("data/example_data_set.csv")
+```
+
+```{r}
+# below is some sample code that helps clean out the unnecessary Qualtrics output
+df = data %>% 
+  filter(IPAddress != "[fill in your IP address here]") %>% # first, filter out  responses from yourself (from when you were testing out the survey, etc.)
+  filter(Status != "Survey Preview") %>% # also filter out any responses you submitted via survey preview in Qualtrics
+  select(-c(1:17)) %>% # these columns are almost always unnecessary -- e.g., the time the participant started the survey
+  slice(-1:-2) %>% # these rows are unnecessary, especially if you've given each of your questions meaningful question labels in qualtrics before downloading the csv file
+  filter(consent_response == "Yes" & # filter out those who didn't consent to be in the study
+           bot_check == "[fill in correct answer]") %>% # if you used a bot check or other attention checks, you can also filter out those who didn't pass them
+  mutate(sub_ID = 1:n()) # I recommend also creating a subject ID column at this point (before you manipulate the data into long/tidy format)
+```
+
+
+
